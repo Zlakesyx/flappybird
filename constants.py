@@ -8,3 +8,4 @@ HEIGHT = 800
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 
 GRAVITY = 0.3
+POP_SIZE = 500

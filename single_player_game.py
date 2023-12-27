@@ -27,12 +27,12 @@ class SinglePlayerGame:
             pipe.update()
             self.check_collision(self.bird, pipe)
 
-            if pipe.x + pipe.width <= -10:
+            if pipe.x + Pipe.WIDTH <= -10:
                 self.pipes.remove(pipe)
 
             if pipe.x == const.WIDTH / 2:
-                upper_y = random.randint(pipe.width, const.HEIGHT - pipe.width * 2)
-                lower_y = random.randint(pipe.width, const.HEIGHT - pipe.width)
+                upper_y = random.randint(Pipe.WIDTH, const.HEIGHT - Pipe.WIDTH * 2)
+                lower_y = random.randint(Pipe.WIDTH, const.HEIGHT - Pipe.WIDTH)
                 self.pipes.append(Pipe(const.WIDTH, upper_y, lower_y))
 
     def render(self) -> None:
@@ -46,8 +46,8 @@ class SinglePlayerGame:
     def check_collision(self, bird: Bird, pipe: Pipe) -> None:
         # Collide with pipe
         if (
-            pipe.x <= bird.x + bird.radius <= pipe.x + pipe.width
-            or pipe.x <= bird.x - bird.radius <= pipe.x + pipe.width
+            pipe.x <= bird.x + bird.radius <= pipe.x + Pipe.WIDTH
+            or pipe.x <= bird.x - bird.radius <= pipe.x + Pipe.WIDTH
         ):
             if (
                 bird.y - bird.radius <= pipe.upper_y
@@ -74,7 +74,7 @@ class SinglePlayerGame:
                     self.running = False
 
     def new_game(self) -> None:
-        self.bird = Bird(random.randint(100, const.HEIGHT - 100))
+        self.bird = Bird(random.randint(100, const.HEIGHT - 100), False)
 
         self.pipes = []
         self.pipes.append(Pipe(const.WIDTH, 100, 200))
