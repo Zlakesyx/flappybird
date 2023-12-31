@@ -1,4 +1,3 @@
-import math
 import random
 import pygame
 
@@ -10,9 +9,9 @@ from pipe import Pipe
 
 class Bird:
 
-    def __init__(self, y: float, is_ai: bool) -> None:
+    def __init__(self, is_ai: bool) -> None:
         self.x = const.WIDTH / 4
-        self.y = y  # vertical position
+        self.y = random.randint(100, const.HEIGHT - 100)
         self.dy = 0  # vertical speed
         self.flap_speed = -10
         self.flapping = False
@@ -23,7 +22,7 @@ class Bird:
         self.fitness = 0.0
 
         if self.is_ai:
-            self.brain = NeuralNetwork(6, 16, 2)
+            self.brain = NeuralNetwork(5, 16, 2)
             r = random.randint(0, 255)
             g = random.randint(0, 255)
             b = random.randint(0, 255)
@@ -33,50 +32,32 @@ class Bird:
         self.flapping = True
 
     def decide_action(self, pipes: list[Pipe]) -> None:
-        """
-        inputs: [
-                    vertical position,
-                    distance from pipe upper,
-                    distance from pipe lower,
-                    velocity
-                ]
-        """
         closest = pipes[0]
+        record = const.WIDTH
 
+        # Closest back of pipe
         for pipe in pipes:
-            diff = pipe.x - self.x
-            if diff > 0 and diff > closest.x:
+            diff = (pipe.x + Pipe.WIDTH) - (self.x - self.radius)
+            if diff > 0 and diff < record:
                 closest = pipe
-
-        dy_min = -100
-        dy_max = 100
-        pipe_back = closest.x + Pipe.WIDTH
-        bird_front = self.x + self.radius
-        bird_back = self.x - self.radius
-        bird_top = self.y - self.radius
-        bird_bottom = self.y + self.radius
+                record = diff
 
         # normalize inputs
         norm_y = self.y / const.HEIGHT
-        norm_dy = (self.dy - (dy_min)) / (dy_max - dy_min)
-        norm_dist_upper_front = math.pow((closest.x - bird_front), 2) + math.pow((closest.upper_y - bird_top), 2)
-        norm_dist_lower_front = math.pow((closest.x - bird_front), 2) + math.pow((closest.lower_y - bird_bottom), 2)
-        norm_dist_upper_back = math.pow((pipe_back - bird_back), 2) + math.pow((closest.upper_y - bird_top), 2)
-        norm_dist_lower_back = math.pow((pipe_back - bird_back), 2) + math.pow((closest.lower_y - bird_bottom), 2)
-        norm_dist_upper_front = math.sqrt(norm_dist_upper_front) / const.HEIGHT
-        norm_dist_lower_front = math.sqrt(norm_dist_lower_front) / const.HEIGHT
-        norm_dist_upper_back = math.sqrt(norm_dist_upper_back) / const.HEIGHT
-        norm_dist_lower_back = math.sqrt(norm_dist_lower_back) / const.HEIGHT
+        norm_dy = self.dy / 10
+        norm_pipe_front = closest.x / const.WIDTH
+        norm_pipe_top = closest.upper_y / const.HEIGHT
+        norm_pipe_bottom = closest.lower_y / const.HEIGHT
 
         inputs = [
             norm_y,
             norm_dy,
-            norm_dist_upper_front,
-            norm_dist_lower_front,
-            norm_dist_upper_back,
-            norm_dist_lower_back,
+            norm_pipe_front,
+            norm_pipe_top,
+            norm_pipe_bottom,
         ]
 
+        # TODO outputs are both + 0.9. Why?
         output = self.brain.feed_forward(inputs)
         if output[0] > output[1]:
             self.flap()
@@ -96,6 +77,4 @@ class Bird:
         self.y += self.dy
 
     def draw(self) -> None:
-        if self.is_ai:
-            pygame.draw.circle(const.SCREEN, "white", (self.x, self.y), self.radius + 1)
         pygame.draw.circle(const.SCREEN, self.color, (self.x, self.y), self.radius)

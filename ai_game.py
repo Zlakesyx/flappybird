@@ -18,6 +18,8 @@ class AiGame:
         self.pipes = []
         self.birds = []
         self.dead_birds = []
+        self.fast_forward = 1
+        self.generation = 0
 
         self.new_game(True)
 
@@ -82,15 +84,26 @@ class AiGame:
                 elif event.key == pygame.K_q:
                     print("Exiting game...")
                     self.running = False
+                elif event.key == pygame.K_RIGHT:
+                    self.fast_forward += 5
+                elif event.key == pygame.K_LEFT:
+                    if self.fast_forward - 10 < 1:
+                        self.fast_forward = 1
+                    else:
+                        self.fast_forward -= 5
 
     def new_game(self, first_gen: bool) -> None:
         if first_gen:
             self.birds = []
+            self.dead_birds = []
+            self.generation = 0
             for _ in range(const.POP_SIZE):
-                self.birds.append(Bird(random.randint(100, const.HEIGHT - 100), True))
+                self.birds.append(Bird(True))
         else:
             self.birds = get_next_generation(self.dead_birds)
             self.dead_birds = []
+            self.generation += 1
+            print(f"Generation: {self.generation}")
 
         self.pipes = []
         upper_y = random.randint(Pipe.WIDTH, const.HEIGHT - Pipe.WIDTH * 2)
@@ -102,8 +115,9 @@ class AiGame:
         clock = pygame.time.Clock()
 
         while self.running:
-            self.check_events()
-            self.update()
+            for _ in range(self.fast_forward):
+                self.check_events()
+                self.update()
             self.render()
             if self.game_over:
                 self.new_game(False)

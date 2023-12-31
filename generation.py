@@ -1,4 +1,5 @@
 import copy
+import math
 import random
 
 import constants as const
@@ -10,6 +11,7 @@ def calculate_fitness(population: list[Bird]) -> None:
     total = 0
 
     for bird in population:
+        bird.score = math.pow(bird.score, 3)
         total += bird.score
 
     for bird in population:
@@ -27,15 +29,17 @@ def pick_one(population: list[Bird], ) -> Bird:
 
     index -= 1
 
-    child = copy.deepcopy(population[index])
+    child = Bird(True)
+    child.brain = copy.deepcopy(population[index].brain)
     child.brain.mutate(mutate)
+
     return child
 
 
 def mutate(x: any) -> None:
     rate = 0.10
     if random.random() < rate:
-        new_val = x + random.gauss(0, 0.1)
+        new_val = x + random.gauss(0, 0.5)
         return new_val
     else:
         return x
