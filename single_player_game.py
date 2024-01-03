@@ -74,7 +74,7 @@ class SinglePlayerGame:
                     self.running = False
 
     def new_game(self) -> None:
-        self.bird = Bird(random.randint(100, const.HEIGHT - 100), False)
+        self.bird = Bird(False)
 
         self.pipes = []
         self.pipes.append(Pipe(const.WIDTH, 100, 200))
